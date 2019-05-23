@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 var db *gorm.DB
@@ -14,38 +14,24 @@ type Person struct {
 	ID        uint   `json:"id"`
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`
+	City      string `json:"city"`
 }
 
 func main() {
 
-	db, _ = gorm.Open("sqlite3", "/tmp/gorm.db")
+	db, err = gorm.Open("mysql", "root:P@ssw0rd@tcp(127.0.0.1:3306)/zen?charset=utf8&parseTime=True&loc=Local")
+	if err != nil {
+		panic("connection failed:" + err.Error())
+	}
 	defer db.Close()
 
+	fmt.Println("db=", db)
 	db.AutoMigrate(&Person{})
 
-	p1 := Person{FirstName: "John", LastName: "Doe",}
-	p2 := Person{FirstName: "Jone", LastName: "Smith",}
-
-	fmt.Println(p1.FirstName)
-	fmt.Println(p2.FirstName)
-
-	db.Create(&p1)
-	var p3 Person
-	db.First(&p3)
-	fmt.Println("p3=", p3)
-
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Hello World")
-	})
-	r.POST("/people", CreatePerson)
 	r.GET("/people", GetPeople)
 	r.GET("/people/:id", GetPerson)
+	r.POST("/people", CreatePerson)
 	r.PUT("/people/:id", UpdatePerson)
 	r.DELETE("/people/:id", DeletePerson)
 
