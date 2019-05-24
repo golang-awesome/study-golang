@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 func addNum(num *int32, min int32, max int32, f func()) {
@@ -33,6 +34,7 @@ func coordinateWithWaitGroup() {
 	max := int32(10)
 	go addNum(&num, 3, max, func() {
 		wg.Done()
+		fmt.Println("hello")
 	})
 	go addNum(&num, 4, max, wg.Done)
 	wg.Wait()
@@ -56,6 +58,46 @@ func coordinateWithWaitGroupBatch() {
 	fmt.Println("End.")
 }
 
+func testWaitGroup() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		fmt.Println("1st goroutine sleeping")
+		time.Sleep(1)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fmt.Println("2nd goroutine sleeping")
+		time.Sleep(2)
+	}()
+
+	wg.Wait()
+	fmt.Println("all goroutines complete.")
+}
+
+func testLoop() {
+	hello := func(wg *sync.WaitGroup, id int) {
+		defer wg.Done()
+		fmt.Printf("Hello from %v!\n", id)
+	}
+
+	const numGreeters = 5
+	var wg sync.WaitGroup
+	wg.Add(numGreeters)
+	for i := 0; i < numGreeters; i++ {
+		go hello(&wg, i + 1)
+	}
+
+	wg.Wait()
+}
+
+
 func main() {
-	coordinateWithWaitGroupBatch()
+	//coordinateWithWaitGroupBatch()
+	//testWaitGroup()
+	testLoop()
 }
