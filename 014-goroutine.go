@@ -9,7 +9,24 @@ import (
 
 type Run func()
 
+func hello2() {
+	fmt.Println("hello")
+}
+
 func main() {
+	go hello2()
+
+	// anonymous
+	go func() {
+		fmt.Println("hello world")
+	}()
+
+	// variable
+	sayHello := func() {
+		fmt.Println("hello")
+	}
+	go sayHello()
+
 	num := runtime.GOMAXPROCS(2)
 	fmt.Println(num)
 	num2 := runtime.GOMAXPROCS(2)
