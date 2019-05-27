@@ -22,10 +22,6 @@ func main() {
 				var result Result
 				resp, err := http.Get(url)
 				result = Result{Error: err, Response: resp}
-				if err != nil {
-					fmt.Println(err)
-					continue
-				}
 				select {
 				case <-done:
 					return
@@ -39,10 +35,16 @@ func main() {
 	done := make(chan interface{})
 	defer close(done)
 
-	urls := []string{"http://www.baidu.com", "https://badhost",}
+	errCount := 0
+	urls := []string{"http://www.baidu.com", "d", "https://badhost", "a", "b", "c"}
 	for result := range checkStatus(done, urls...) {
 		if result.Error != nil {
-			fmt.Printf("error: %v", result.Error)
+			fmt.Printf("error: %v\n", result.Error)
+			errCount++
+			if errCount >= 3 {
+				fmt.Println("error: Too many errors, breaking!")
+				break
+			}
 			continue
 		}
 		fmt.Printf("Response: %v\n", result.Response.Status)
