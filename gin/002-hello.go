@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+var File = struct{}{}
+
 func main() {
 	g := gin.New()
 

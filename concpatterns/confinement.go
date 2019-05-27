@@ -35,6 +35,7 @@ func TestConfinement() {
 		results := make(chan int, 5)
 
 		// async write to channel
+		// and then close the channel
 		go func() {
 			defer close(results)
 			for i := 0; i < 5; i++ {
