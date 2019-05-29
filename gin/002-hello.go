@@ -87,6 +87,37 @@ func main() {
 		c.String(http.StatusOK, "upload successfully")
 	})
 
+	// multi files uploading
+	g.POST("/upload/multi", func(c *gin.Context) {
+		err := c.Request.ParseMultipartForm(200000)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		formdata := c.Request.MultipartForm
+		files := formdata.File["file"]
+		for i, _ := range files {
+			fmt.Println("processing: " + files[i].Filename)
+			file, err := files[i].Open()
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer file.Close()
+
+			out, err := os.Create(files[i].Filename)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer out.Close()
+
+			_, err = io.Copy(out, file)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		c.String(http.StatusCreated, "upload successfully")
+	})
+
 	// body
-	g.Run(":8080")
+	_ = g.Run(":8080")
 }
